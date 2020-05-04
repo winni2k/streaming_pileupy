@@ -6,7 +6,7 @@ install: pip install -U tox-travis
 script: tox
 deploy:
   provider: pypi
-  distributions: sdist bdist_wheel
+  distributions: sdist
   user: wkretzsch
   password:
     secure: IT3WxzPg35JbNHPWR/OL0TWRfYKDwa8O62HUvXZ1KcBPVWqaBk1VHXKsK38WwojbL6lC9HSRgdOzkMCVC2U6vthI6/oKp++NtFsw1t/8/FnAkUWc9PFFNR6SmuYs9InCoETU+PpfULbuzsSzsUUYIwm9WazHEe4Fu5a5i5XzaQppfT0Zoi3TN4Bq2g1MP+6PPZhm5GfcRaSiplYbufgABKj4wEAONXLh73dBP+GJWoCRBNOnpYRzojtDt5I94+PHOjKV0ywxuRfIsD8hrAFRlfAmzTIlLTgMf7ZTtWIX+nKOYCSVCDZ7bvhPWZN8pFRqIgTJgC7Wng2t38Ib/bBTxYGjk4QRYDkdWqpAhaq8AHXu2nTvwvpdYhPmnBd+q/KQOcAfa4yp/jxFCCiquV/CjdnToVnj8TJnxZIAdE04uWtItFCxIMjWf5pZhFFY65BAKkj2wnAo3F48ux+sWX5vjXSpLyIxN0SGMzUcMzZU7H0y5NT4PE8+l/GoBGjQoMTFXNqHbUIAL6awGLvhrBs1Ovfwv8vo5ULLgbQOezVkTskRbiFxB5f++L5dnNUi6hzy2aHEAeTgvS08P6FNm/DBwmaNVpMNMIMs7bdxpqCbRSZ6HZIGbcT0hmH7w7YM3S65ZXQR6m2114mxfKeB9+dMydgVjcLU8K0SpkOIm3i9SSw=
