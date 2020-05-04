@@ -12,7 +12,7 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "Click>=7.0",
-    "pysam==0.15.3",
+    "pysam==0.15.4",
 ]
 
 setup(
