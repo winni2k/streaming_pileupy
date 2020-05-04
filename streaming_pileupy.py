@@ -1,16 +1,16 @@
-"""Console script for streaming_pileupy."""
+"""streaming_pileupy"""
+__author__ = """Warren W. Kretzschmar"""
+__email__ = "winni@warrenwk.com"
+__version__ = "0.1.0"
+
 import sys
 from collections import defaultdict
 from contextlib import closing
-
-import click
-
-import sys
 from dataclasses import dataclass
-from typing import Dict, IO, DefaultDict, Tuple, List
+from typing import IO, DefaultDict, Dict, List, Tuple
 
-import pysam
 import click
+import pysam
 
 # def get_regions(bed_file):
 #     with open(bed_file, 'r') as fh:

@@ -8,7 +8,6 @@ Welcome to Streaming Pileupy's documentation!
    readme
    installation
    usage
-   modules
    contributing
    authors
    history
