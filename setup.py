@@ -33,7 +33,7 @@ setup(
     description="Create multi-sample text-pileups of streaming SAM/BAM files.",
     entry_points={
         'console_scripts': [
-            'streaming_pileupy=streaming_pileupy.cli:main',
+            'spileup=streaming_pileupy.cli:main',
         ],
     },
     install_requires=requirements,
