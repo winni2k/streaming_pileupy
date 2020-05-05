@@ -1,5 +1,5 @@
 Welcome to Streaming Pileupy's documentation!
-======================================
+=============================================
 
 .. toctree::
    :maxdepth: 2
@@ -12,8 +12,3 @@ Welcome to Streaming Pileupy's documentation!
    authors
    history
 
-Indices and tables
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

@@ -3,6 +3,7 @@ __author__ = """Warren W. Kretzschmar"""
 __email__ = "winni@warrenwk.com"
 __version__ = "0.2.1"
 
+import logging
 import sys
 from collections import defaultdict
 from contextlib import closing
@@ -17,13 +18,26 @@ import pysam
 #         for line in bed_file:
 #             yield line.rstrip('\n').split(maxsplit=3)[0:3]
 
-QUERY_CONSUMERS = (
-    pysam.CMATCH,
-    pysam.CINS,
-    pysam.CSOFT_CLIP,
-    pysam.CEQUAL,
-    pysam.CDIFF,
-)
+logger = logging.getLogger(__name__)
+
+
+def set_logging(verbose):
+    if verbose == 1:
+        logging.basicConfig(level=logging.INFO)
+    elif verbose > 1:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+
+
+def log_record_info(match_base, rec, sequence):
+    logger.debug(f"match_base: {match_base}")
+    ref_positions = rec.get_reference_positions()
+    ref_sequence = rec.get_reference_sequence()
+    logger.debug(str(rec))
+    logger.debug(f"ref_positions: len={len(ref_positions)}, positions={ref_positions}")
+    logger.debug(f"ref_sequence: len={len(ref_sequence)}, seq={ref_sequence}")
+    logger.debug(f"sequence: len={len(sequence)}, seq={sequence}")
 
 
 def get_rg_lookup_table(header):
@@ -75,19 +89,20 @@ class MpileupWriter:
     def _flush_position(self, pos):
         ref_base = self.ref_bases.pop(pos)
         pos_bases = self.buffer.pop(pos)
-        self.out_fh.write(f"{self.chrom}\t{pos+1}\t{ref_base.upper()}")
+        self.out_fh.write(f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}")
         for sample in self.samples:
-            try:
-                bases, quals = list(zip(*pos_bases[sample]))
-            except KeyError:
+            sample_data = pos_bases.get(sample, None)
+            if not sample_data:
                 n_bases, bases, quals = 0, "*", "*"
             else:
+                bases, quals = list(zip(*sample_data))
                 quals = [chr(q + 33) for q in quals]
                 assert len(bases) == len(quals)
                 n_bases = len(bases)
                 bases = "".join(bases)
                 quals = "".join(quals)
             self.out_fh.write(f"\t{n_bases}\t{bases}\t{quals}")
+        self.out_fh.write("\n")
 
 
 @dataclass
@@ -113,26 +128,29 @@ class RecordReader:
         else:
             match_base = "."
 
-        current_read_pos = 0
-        ref_positions = rec.get_reference_positions()
-        ref_sequence = rec.get_reference_sequence()
-        sequence = rec.get_forward_sequence()
-        qualities = rec.get_forward_qualities()
-        for operation, cigar_len in rec.cigartuples:
-            if operation in (pysam.CMATCH, pysam.CEQUAL, pysam.CDIFF):
-                for read_pos in range(current_read_pos, cigar_len + current_read_pos):
-                    base = sequence[read_pos]
-                    if base == ref_positions[read_pos]:
-                        base = match_base
-                    self.writer.add_base(
-                        sample=self.rg_table[rg_id],
-                        pos=ref_positions[read_pos],
-                        base=base,
-                        qual=qualities[read_pos],
-                        ref=ref_sequence[read_pos],
-                    )
-            if operation in QUERY_CONSUMERS:
-                current_read_pos += cigar_len
+        sequence = rec.query_sequence
+        qualities = rec.query_qualities
+        if logger.isEnabledFor(logging.DEBUG):
+            log_record_info(match_base, rec, sequence)
+
+        for read_pos, ref_pos, ref_base in rec.get_aligned_pairs(
+            matches_only=True, with_seq=True
+        ):
+            logger.debug("read: %s, ref: %s, ref_base: %s", read_pos, ref_pos, ref_base)
+            base = sequence[read_pos].upper()
+            if base == ref_base.upper():
+                base = match_base
+            if rec.is_reverse:
+                base = base.lower()
+
+            sample = self.rg_table[rg_id]
+            self.writer.add_base(
+                sample=sample,
+                pos=ref_pos,
+                base=base,
+                qual=qualities[read_pos],
+                ref=ref_base,
+            )
 
     def close(self):
         self.writer.flush_all()
@@ -143,14 +161,18 @@ class RecordReader:
 @click.argument(
     "sample_file", type=click.File(),
 )
-def main(input, sample_file):
+@click.version_option()
+@click.option("-v", "--verbose", count=True)
+def main(input, sample_file, verbose):
     """Create a read-group-aware pileup from a single file.
 
-    INPUT: Stream of a SAM/BAM file (including header).
+    INPUT: Stream of a SAM/BAM file (including header), '-' reads from stdin.
     SAMPLE_FILE: File containing each sample to pileup on a separate line.
 
     The read group's SM tag is used to infer samples.
+    Pileup columns correspond to samples in SAMPLE_FILE in the order given in the file.
     """
+    set_logging(verbose)
     infile = pysam.AlignmentFile(input, "r")
     samples = [s.rstrip("\n") for s in sample_file]
     rg_table = get_rg_lookup_table(infile.header)

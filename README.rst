@@ -30,7 +30,16 @@ Create multi-sample text-pileups of streaming SAM/BAM files.
 Features
 --------
 
-* TODO
+Streaming Pileupy creates a pileup of a single SAM/BAM file
+using the read group SM identifier to split reads by sample.
+
+Missing features
+----------------
+
+* Base quality filtering
+* Read beginning and end annotations in pileup output
+* Deletion annotations in pileup output
+* Filter output bases on BED file
 
 Credits
 -------
