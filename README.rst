@@ -31,7 +31,12 @@ Features
 --------
 
 Streaming Pileupy creates a pileup of a single SAM/BAM file
-using the read group SM identifier to split reads by sample.
+using the read group SM identifier to split reads by sample:
+
+.. code-block:: text
+
+    spileup input.bam sample_names.txt
+
 
 Missing features
 ----------------
