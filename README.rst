@@ -33,8 +33,14 @@ Features
 Streaming Pileupy creates a pileup of a single SAM/BAM file
 using the read group SM identifier to split reads by sample:
 
-.. code-block:: text
+.. code-block:: bash
 
+    # extract sample names from read group SM tag
+    samtools view -H input.bam \
+      | grep '^@RG' \
+      | perl -pne 's/.*SM:(\S+).*/$1/' > sample_names.txt
+
+    # create read-group aware pileup
     spileup input.bam sample_names.txt
 
 
