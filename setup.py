@@ -40,6 +40,6 @@ setup(
     packages=find_packages(include=["streaming_pileupy", "streaming_pileupy.*"]),
     test_suite="tests",
     url="https://github.com/winni2k/streaming_pileupy",
-    version="0.2.1",
+    version="0.3.0",
     zip_safe=False,
 )
