@@ -38,7 +38,8 @@ using the read group SM identifier to split reads by sample:
     # extract sample names from read group SM tag
     samtools view -H input.bam \
       | grep '^@RG' \
-      | perl -pne 's/.*SM:(\S+).*/$1/' > sample_names.txt
+      | perl -pne 's/.*SM:(\S+).*/$1/' \
+      | sort | uniq > sample_names.txt
 
     # create read-group aware pileup
     spileup input.bam sample_names.txt
