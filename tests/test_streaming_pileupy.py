@@ -58,7 +58,7 @@ def test_two_record_sam(tmpdir):
 
     # when
     sam, samples = builder.build()
-    result = run(f"spileup {sam} {samples}", shell=True, stdout=PIPE, text=True)
+    result = run(f"spileup {sam} {samples}", shell=True, stdout=PIPE, encoding='utf-8')
 
     # then
     expected = "1 24 N 1 G I 1 G I\n".replace(" ", "\t")
@@ -71,7 +71,7 @@ def test_fixture_1(tmpdir):
     samples = "tests/fixtures/fixture_1.samples.txt"
 
     # when
-    result = run(f"spileup {fixture_sam} {samples}", shell=True, stdout=PIPE, text=True)
+    result = run(f"spileup {fixture_sam} {samples}", shell=True, stdout=PIPE, encoding='utf-8')
 
     # then
     expected = (
