@@ -58,7 +58,7 @@ def test_two_record_sam(tmpdir):
 
     # when
     sam, samples = builder.build()
-    result = run(f"spileup {sam} {samples}", shell=True, stdout=PIPE, encoding='utf-8')
+    result = run(f"spileup {sam} {samples}", shell=True, stdout=PIPE, encoding="utf-8")
 
     # then
     expected = "1 24 N 1 G I 1 G I\n".replace(" ", "\t")
@@ -67,15 +67,18 @@ def test_two_record_sam(tmpdir):
 
 def test_fixture_1(tmpdir):
     # given
-    fixture_sam = "tests/fixtures/fixture_1.sam"
-    samples = "tests/fixtures/fixture_1.samples.txt"
+    fixture_dir = Path("tests/fixtures/fixture_1")
+    fixture_sam = fixture_dir / "fixture_1.sam"
+    samples = fixture_dir / "fixture_1.samples.txt"
 
     # when
-    result = run(f"spileup {fixture_sam} {samples}", shell=True, stdout=PIPE, encoding='utf-8')
+    result = run(
+        f"spileup {fixture_sam} {samples}", shell=True, stdout=PIPE, encoding="utf-8"
+    )
 
     # then
     expected = (
-        open("tests/fixtures/fixture_1.pileup", "r")
+        open(fixture_dir / "fixture_1.pileup", "r")
         .read()
         # todo: Implement these unsupported features
         .replace("^", "")
