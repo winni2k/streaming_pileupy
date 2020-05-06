@@ -1,7 +1,7 @@
 """streaming_pileupy"""
 __author__ = """Warren W. Kretzschmar"""
 __email__ = "winni@warrenwk.com"
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 
 import logging
 import sys
