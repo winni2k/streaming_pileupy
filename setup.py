@@ -41,6 +41,6 @@ setup(
     py_modules=["streaming_pileupy"],
     package_dir={"": "src"},
     url="https://github.com/winni2k/streaming_pileupy",
-    version="0.5.3",
+    version="0.5.4",
     zip_safe=False,
 )
