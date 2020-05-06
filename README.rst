@@ -44,11 +44,15 @@ using the read group SM identifier to split reads by sample:
     # create read-group aware pileup
     spileup input.bam sample_names.txt
 
+Base quality filtering
+``````````````````````
+
+Bases with less than a certain quality can be filtered with ``-Q``.
+
 
 Missing features
 ----------------
 
-* Base quality filtering
 * Read beginning and end annotations in pileup output
 * Deletion annotations in pileup output
 * Filter output bases on BED file
