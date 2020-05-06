@@ -94,10 +94,15 @@ class MpileupWriter:
         ref_base = self.ref_bases.pop(pos)
         pos_bases = self.buffer.pop(pos)
         outline = [f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}"]
+        outline += list(self._get_sample_strings(pos_bases))
+        outline.append("\n")
+        self.out_fh.write("".join(outline))
+
+    def _get_sample_strings(self, pos_bases):
         for sample in self.samples:
             sample_data = pos_bases.get(sample, None)
             if not sample_data:
-                sample_string = "\t0\t*\t*"
+                yield "\t0\t*\t*"
             else:
                 bases, quals = list(zip(*sample_data))
                 quals = [chr(q + 33) for q in quals]
@@ -105,10 +110,7 @@ class MpileupWriter:
                 n_bases = len(bases)
                 bases = "".join(bases)
                 quals = "".join(quals)
-                sample_string = f"\t{n_bases}\t{bases}\t{quals}"
-            outline.append(sample_string)
-        outline.append("\n")
-        self.out_fh.write("".join(outline))
+                yield f"\t{n_bases}\t{bases}\t{quals}"
 
 
 @dataclass
