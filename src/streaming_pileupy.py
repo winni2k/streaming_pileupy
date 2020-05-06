@@ -93,11 +93,11 @@ class MpileupWriter:
     def _flush_position(self, pos):
         ref_base = self.ref_bases.pop(pos)
         pos_bases = self.buffer.pop(pos)
-        self.out_fh.write(f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}")
+        outline = [f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}"]
         for sample in self.samples:
             sample_data = pos_bases.get(sample, None)
             if not sample_data:
-                n_bases, bases, quals = 0, "*", "*"
+                sample_string = "\t0\t*\t*"
             else:
                 bases, quals = list(zip(*sample_data))
                 quals = [chr(q + 33) for q in quals]
@@ -105,8 +105,10 @@ class MpileupWriter:
                 n_bases = len(bases)
                 bases = "".join(bases)
                 quals = "".join(quals)
-            self.out_fh.write(f"\t{n_bases}\t{bases}\t{quals}")
-        self.out_fh.write("\n")
+                sample_string = f"\t{n_bases}\t{bases}\t{quals}"
+            outline.append(sample_string)
+        outline.append("\n")
+        self.out_fh.write("".join(outline))
 
 
 @dataclass
