@@ -100,7 +100,10 @@ class MpileupWriter:
 
     def _get_sample_strings(self, pos_bases):
         for sample in self.samples:
-            sample_data = pos_bases.get(sample, None)
+            if sample in pos_bases:
+                sample_data = pos_bases[sample]
+            else:
+                sample_data = None
             if not sample_data:
                 yield "\t0\t*\t*"
             else:
