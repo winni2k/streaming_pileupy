@@ -1,4 +1,6 @@
 """streaming_pileupy"""
+import itertools
+
 __author__ = """Warren W. Kretzschmar"""
 __email__ = "winni@warrenwk.com"
 __version__ = "0.5.4"
@@ -93,10 +95,12 @@ class MpileupWriter:
     def _flush_position(self, pos):
         ref_base = self.ref_bases.pop(pos)
         pos_bases = self.buffer.pop(pos)
-        outline = [f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}"]
-        outline += list(self._get_sample_strings(pos_bases))
-        outline.append("\n")
-        self.out_fh.write("".join(outline))
+        out_line = itertools.chain(
+            [f"{self.chrom}\t{pos + 1}\t{ref_base.upper()}"],
+            self._get_sample_strings(pos_bases),
+            ["\n"],
+        )
+        self.out_fh.write("".join(out_line))
 
     def _get_sample_strings(self, pos_bases):
         for sample in self.samples:
