@@ -65,11 +65,25 @@ def test_two_record_sam(tmpdir):
     assert expected == result.stdout
 
 
-def test_fixture_1(tmpdir):
+def remove_unsupported_features(expected):
+    """todo: Implement these unsupported features"""
+    expected = (
+        expected.replace("^", "")
+        .replace("]", "")
+        .replace("$", "")
+        .replace("1\t*\tF", "0\t*\t*")
+    )
+    expected = re.sub(r"-1\S", "", expected)
+    expected = re.sub(r"1\t\*\tF", "0\t*\t*", expected)
+    return expected
+
+
+def test_fixture_1():
     # given
-    fixture_dir = Path("tests/fixtures/fixture_1")
-    fixture_sam = fixture_dir / "fixture_1.sam"
-    samples = fixture_dir / "fixture_1.samples.txt"
+    shared_fixture_dir = Path("tests/fixtures")
+    fixture_dir = shared_fixture_dir / "fixture_1"
+    fixture_sam = shared_fixture_dir / "base_1.sam"
+    samples = fixture_dir / "input.samples.txt"
 
     # when
     result = run(
@@ -77,15 +91,27 @@ def test_fixture_1(tmpdir):
     )
 
     # then
-    expected = (
-        open(fixture_dir / "fixture_1.pileup", "r")
-        .read()
-        # todo: Implement these unsupported features
-        .replace("^", "")
-        .replace("]", "")
-        .replace("$", "")
-        .replace("1\t*\tF", "0\t*\t*")
+    expected = open(fixture_dir / "output.pileup", "r").read()
+    expected = remove_unsupported_features(expected)
+    assert expected.replace("\t", " ") == result.stdout.replace("\t", " ")
+
+
+def test_fixture_2_filtered_bases_on_qual():
+    # given
+    shared_fixture_dir = Path("tests/fixtures")
+    fixture_dir = shared_fixture_dir / "fixture_2"
+    fixture_sam = shared_fixture_dir / "base_1.sam"
+    samples = fixture_dir / "input.samples.txt"
+
+    # when
+    result = run(
+        f"spileup -Q30 {fixture_sam} {samples} ",
+        shell=True,
+        stdout=PIPE,
+        encoding="utf-8",
     )
-    expected = re.sub(r"-1\S", "", expected)
-    expected = re.sub(r"1\t\*\tF", "0\t*\t*", expected)
-    assert expected == result.stdout
+
+    # then
+    expected = open(fixture_dir / "output.pileup", "r").read()
+    expected = remove_unsupported_features(expected)
+    assert expected.replace("\t", " ") == result.stdout.replace("\t", " ")

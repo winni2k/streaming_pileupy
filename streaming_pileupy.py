@@ -51,6 +51,7 @@ class MpileupWriter:
     buffer: DefaultDict[int, DefaultDict[str, List[Tuple[str, int]]]]
     ref_bases: Dict[int, str]
     _chrom: str
+    min_bq: int
 
     @classmethod
     def from_filehandle_and_samples(cls, fh, samples):
@@ -60,11 +61,14 @@ class MpileupWriter:
             buffer=defaultdict(lambda: defaultdict(list)),
             ref_bases={},
             _chrom="",
+            min_bq=0,
         )
 
     def add_base(self, sample: str, pos: int, base: str, qual: int, ref: str) -> None:
         self.buffer[pos][sample].append((base, qual))
         self.ref_bases[pos] = ref
+        if qual < self.min_bq:
+            self.buffer[pos][sample].pop()
 
     @property
     def chrom(self):
@@ -137,15 +141,15 @@ class RecordReader:
             matches_only=True, with_seq=True
         ):
             logger.debug("read: %s, ref: %s, ref_base: %s", read_pos, ref_pos, ref_base)
+
             base = sequence[read_pos].upper()
             if base == ref_base.upper():
                 base = match_base
             if rec.is_reverse:
                 base = base.lower()
 
-            sample = self.rg_table[rg_id]
             self.writer.add_base(
-                sample=sample,
+                sample=self.rg_table[rg_id],
                 pos=ref_pos,
                 base=base,
                 qual=qualities[read_pos],
@@ -157,13 +161,20 @@ class RecordReader:
 
 
 @click.command()
+@click.version_option()
+@click.option("-v", "--verbose", count=True)
+@click.option(
+    "-Q",
+    "--min-BQ",
+    help="skip bases with baseQ/BAQ smaller than INT",
+    type=int,
+    default=0,
+)
 @click.argument("input", type=click.Path(allow_dash=False))
 @click.argument(
     "sample_file", type=click.File(),
 )
-@click.version_option()
-@click.option("-v", "--verbose", count=True)
-def main(input, sample_file, verbose):
+def main(input, sample_file, verbose, min_bq):
     """Create a read-group-aware pileup from a single file.
 
     INPUT: Stream of a SAM/BAM file (including header), '-' reads from stdin.
@@ -177,14 +188,12 @@ def main(input, sample_file, verbose):
     samples = [s.rstrip("\n") for s in sample_file]
     rg_table = get_rg_lookup_table(infile.header)
 
-    writer = RecordReader(
-        current_pos=0,
-        rg_table=rg_table,
-        writer=MpileupWriter.from_filehandle_and_samples(sys.stdout, samples),
-    )
-    with closing(writer):
+    writer = MpileupWriter.from_filehandle_and_samples(sys.stdout, samples)
+    writer.min_bq = min_bq
+    piler = RecordReader(current_pos=0, rg_table=rg_table, writer=writer,)
+    with closing(piler):
         for rec in infile:
-            writer.ingest(infile.get_reference_name(rec.reference_id), rec)
+            piler.ingest(infile.get_reference_name(rec.reference_id), rec)
 
     return 0
 
