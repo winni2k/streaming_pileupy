@@ -50,7 +50,7 @@ def get_rg_lookup_table(header):
 class MpileupWriter:
     out_fh: IO[str]
     samples: List[str]
-    buffer: DefaultDict[int, DefaultDict[str, List[Tuple[str, int]]]]
+    buffer: DefaultDict[int, List[Tuple[str, str, int]]]
     ref_bases: Dict[int, str]
     _chrom: str
     min_bq: int
@@ -60,7 +60,7 @@ class MpileupWriter:
         return cls(
             out_fh=fh,
             samples=samples,
-            buffer=defaultdict(lambda: defaultdict(list)),
+            buffer=defaultdict(list),
             ref_bases={},
             _chrom="",
             min_bq=0,
@@ -68,11 +68,10 @@ class MpileupWriter:
 
     def add_base(self, sample: str, pos: int, base: str, qual: int, ref: str) -> None:
         self.ref_bases[pos] = ref
-        buffer_pos_sample = self.buffer[pos][sample]
+        buffer_pos_sample = self.buffer[pos]
         if qual < self.min_bq:
             return
-        buffer_pos_sample.append((base, qual))
-
+        buffer_pos_sample.append((sample, base, qual))
 
     @property
     def chrom(self):
@@ -105,21 +104,23 @@ class MpileupWriter:
         self.out_fh.write("".join(out_line))
 
     def _get_sample_strings(self, pos_bases):
+        samp_bases = defaultdict(list)
+        samp_quals = defaultdict(list)
+        for sample, base, qual in pos_bases:
+            samp_bases[sample].append(base)
+            samp_quals[sample].append(qual)
         for sample in self.samples:
-            if sample in pos_bases:
-                sample_data = pos_bases[sample]
-            else:
-                sample_data = None
-            if not sample_data:
-                yield "\t0\t*\t*"
-            else:
-                bases, quals = list(zip(*sample_data))
+            if sample in samp_bases:
+                bases = samp_bases[sample]
+                quals = samp_quals[sample]
                 quals = [chr(q + 33) for q in quals]
                 assert len(bases) == len(quals)
                 n_bases = len(bases)
                 bases = "".join(bases)
                 quals = "".join(quals)
                 yield f"\t{n_bases}\t{bases}\t{quals}"
+            else:
+                yield "\t0\t*\t*"
 
 
 @dataclass
