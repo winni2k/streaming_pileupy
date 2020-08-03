@@ -67,11 +67,11 @@ class MpileupWriter:
         )
 
     def add_base(self, sample: str, pos: int, base: str, qual: int, ref: str) -> None:
-        buffer_pos_sample = self.buffer[pos][sample]
-        buffer_pos_sample.append((base, qual))
         self.ref_bases[pos] = ref
+        buffer_pos_sample = self.buffer[pos][sample]
         if qual < self.min_bq:
-            buffer_pos_sample.pop()
+            return
+        buffer_pos_sample.append((base, qual))
 
 
     @property

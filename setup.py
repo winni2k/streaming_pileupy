@@ -17,7 +17,7 @@ requirements = [
 ]
 
 setup(
-    version="0.5.5",
+    version="0.5.6",
     author="Warren W. Kretzschmar",
     author_email="winni@warrenwk.com",
     python_requires=">=3.6",
