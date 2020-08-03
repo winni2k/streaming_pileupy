@@ -12,11 +12,12 @@ with open("HISTORY.rst") as history_file:
 
 requirements = [
     "Click>=7.0",
-    "pysam==0.15.4",
+    "pysam>=0.15.4",
     "dataclasses",
 ]
 
 setup(
+    version="0.5.5",
     author="Warren W. Kretzschmar",
     author_email="winni@warrenwk.com",
     python_requires=">=3.6",
@@ -41,6 +42,5 @@ setup(
     py_modules=["streaming_pileupy"],
     package_dir={"": "src"},
     url="https://github.com/winni2k/streaming_pileupy",
-    version="0.5.4",
     zip_safe=False,
 )

@@ -67,10 +67,12 @@ class MpileupWriter:
         )
 
     def add_base(self, sample: str, pos: int, base: str, qual: int, ref: str) -> None:
-        self.buffer[pos][sample].append((base, qual))
+        buffer_pos_sample = self.buffer[pos][sample]
+        buffer_pos_sample.append((base, qual))
         self.ref_bases[pos] = ref
         if qual < self.min_bq:
-            self.buffer[pos][sample].pop()
+            buffer_pos_sample.pop()
+
 
     @property
     def chrom(self):
@@ -148,10 +150,11 @@ class RecordReader:
         if logger.isEnabledFor(logging.DEBUG):
             log_record_info(match_base, rec, sequence)
 
+        read_group = self.rg_table[rg_id]
         for read_pos, ref_pos, ref_base in rec.get_aligned_pairs(
             matches_only=True, with_seq=True
         ):
-            logger.debug("read: %s, ref: %s, ref_base: %s", read_pos, ref_pos, ref_base)
+            # logger.debug("read: %s, ref: %s, ref_base: %s", read_pos, ref_pos, ref_base)
 
             base = sequence[read_pos].upper()
             if base == ref_base.upper():
@@ -160,7 +163,7 @@ class RecordReader:
                 base = base.lower()
 
             self.writer.add_base(
-                sample=self.rg_table[rg_id],
+                sample=read_group,
                 pos=ref_pos,
                 base=base,
                 qual=qualities[read_pos],
