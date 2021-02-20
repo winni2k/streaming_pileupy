@@ -57,6 +57,28 @@ Missing features
 * Deletion annotations in pileup output
 * Filter output bases on BED file
 
+
+Speed benchmarks
+----------------
+
+Speed benchmarks are available at http://warrenwk.com/streaming_pileupy/
+
+The benchmarks are run using Airspeed Velocity:
+
+.. code-black:: bash
+
+    # install asv into conda environment
+    conda create -n spileup_asv asv
+    conda activate asv
+
+    # run benchmarks
+    asv run
+
+    # publish results to github pages
+    asv gh-page
+
+
+
 Credits
 -------
 
