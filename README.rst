@@ -72,11 +72,10 @@ The benchmarks are run using Airspeed Velocity:
     conda activate asv
 
     # run benchmarks
-    asv run
+    FIXTURES=$PWD/benchmarks/fixtures asv run
 
     # publish results to github pages
     asv gh-page
-
 
 
 Credits
